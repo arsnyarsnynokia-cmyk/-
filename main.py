@@ -420,9 +420,4 @@ def relay_message(message):
 
 if __name__ == '__main__':
     print("Анонимный чат запущен!")
-    while True:
-        try:
-            bot.infinity_polling(skip_pending=True, timeout=20, long_polling_timeout=10)
-        except Exception as e:
-            print(f"Критическая ошибка цикла бота: {e}")
-            time.sleep(3)
+    bot.infinity_polling(skip_pending=True)
